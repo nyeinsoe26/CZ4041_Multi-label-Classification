@@ -32,38 +32,39 @@ y_test = test.iloc[:,-6:]
 output_labels = y_train.columns
 
 #converting to one.hot vector form
-y_train = y_train.values
-y_test = y_test.values
+y_train = np.float32(y_train)
+y_test = np.float32(y_test)
 
 #feature scaling
 from sklearn.preprocessing import MinMaxScaler
 x_scaler = MinMaxScaler(feature_range=(0,1))
-x_scaled_train =  x_scaler.fit_transform(x_train)
-x_scaled_test = x_scaler.fit_transform(x_test)
+x_scaled_train =  np.float32(x_scaler.fit_transform(x_train))
+x_scaled_test = np.float32(x_scaler.fit_transform(x_test))
 
 #Model parameters
 learning_rate = 0.001
 training_epochs = 100
 display_step = 5
-threshold = 0.4
+threshold = pow(10,-8)
 beta = pow(10.0,-6)
 num_inputs = 72
 num_outputs = 6
-batch_size = 32
+batch_size = 79
 layer1_nodes = 50
 layer2_nodes = 100
 layer3_nodes = 50
 keep_prob = 0.7
 
+
 N = len(x_scaled_train)
 idx = np.arange(N)
 
 #input layer
-with tf.variable_scope('input',reuse = tf.AUTO_REUSE):
+with tf.variable_scope('input',reuse=tf.AUTO_REUSE):
     X = tf.placeholder(tf.float32, shape=(None,  num_inputs))
 
 #layer 1
-with tf.variable_scope('layer_1',reuse = tf.AUTO_REUSE):
+with tf.variable_scope('layer_1',reuse=tf.AUTO_REUSE):
     weights = tf.get_variable(name = "weights1", shape = [num_inputs,layer1_nodes], initializer = tf.contrib.layers.xavier_initializer())
     biases = tf.get_variable(name="biases1",shape = [layer1_nodes],initializer = tf.zeros_initializer())
     layer1_output = tf.nn.relu(tf.matmul(X,weights) +biases)
@@ -71,38 +72,38 @@ with tf.variable_scope('layer_1',reuse = tf.AUTO_REUSE):
 
 
 #layer 2
-with tf.variable_scope('layer_2',reuse = tf.AUTO_REUSE):
+with tf.variable_scope('layer_2',reuse=tf.AUTO_REUSE):
     weights = tf.get_variable(name = "weights2", shape = [layer1_nodes,layer2_nodes], initializer = tf.contrib.layers.xavier_initializer())
     biases = tf.get_variable(name="biases2",shape = [layer2_nodes],initializer = tf.zeros_initializer())
     layer2_output = tf.nn.relu(tf.matmul(layer1_output_drop,weights) +biases)
     layer2_output_drop = tf.nn.dropout(layer2_output, keep_prob)
 
 #layer 3
-with tf.variable_scope('layer_3',reuse = tf.AUTO_REUSE):
+with tf.variable_scope('layer_3',reuse=tf.AUTO_REUSE):
     weights = tf.get_variable(name = "weights3", shape = [layer2_nodes,layer3_nodes], initializer = tf.contrib.layers.xavier_initializer())
     biases = tf.get_variable(name="biases3",shape = [layer3_nodes],initializer = tf.zeros_initializer())
     layer3_output = tf.nn.relu(tf.matmul(layer2_output_drop,weights) +biases)
     layer3_output_drop = tf.nn.dropout(layer3_output, 0.5)
 
 #output
-with tf.variable_scope('output',reuse = tf.AUTO_REUSE):
+with tf.variable_scope('output',reuse=tf.AUTO_REUSE):
     weights = tf.get_variable(name = "weights4", shape = [layer3_nodes,num_outputs], initializer = tf.contrib.layers.xavier_initializer())
     biases = tf.get_variable(name="biases4",shape = [num_outputs],initializer = tf.zeros_initializer())
     logit = tf.sigmoid(tf.matmul(layer3_output_drop,weights) +biases)
 
 #cost function
-with tf.variable_scope('cost',reuse = tf.AUTO_REUSE):
+with tf.variable_scope('cost',reuse=tf.AUTO_REUSE):
     Y = tf.placeholder(tf.float32, shape=(None,6))
     cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(labels=Y, logits=logit) + beta
     cost = tf.reduce_mean(tf.reduce_sum(cross_entropy, axis=1))
 
 #accuracy function
-with tf.variable_scope('accuracy',reuse = tf.AUTO_REUSE):
+with tf.variable_scope('accuracy',reuse=tf.AUTO_REUSE):
     prediction = tf.cast(logit > threshold, tf.float32)
     correct_prediction = tf.equal(prediction, Y)
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-with tf.variable_scope('train',reuse = tf.AUTO_REUSE):
+with tf.variable_scope('train',reuse=tf.AUTO_REUSE):
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
 
 with tf.Session() as session:
@@ -134,6 +135,12 @@ with tf.Session() as session:
         
         if epoch % 5==0:
             print("Epoch: %d, Train Cost: %g, Test Cost: %g, Train Acc: %g, Test Acc: %g"%(epoch, train_cost_list[epoch],test_cost_list[epoch],train_acc_list[epoch],test_acc_list[epoch]))
+        #random testing
+        random_sample = np.expand_dims(x_scaled_train[422],axis=0)
+        random_sample_y = np.expand_dims(y_train[422],axis=0)
+
+        predict = prediction.eval(feed_dict={X:random_sample,Y:random_sample_y})
+        predict_percentage = accuracy.eval(feed_dict={X:random_sample,Y:random_sample_y})
     #plotting results
     pylab.figure(1)
     pylab.plot(np.arange(training_epochs),train_cost_list,label = 'Train Cost Vs epochs')
