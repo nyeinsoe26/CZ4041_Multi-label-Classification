@@ -43,16 +43,17 @@ if not os.path.isdir(folderDir):
     os.makedirs(folderDir)
     
 #loading dataset
-emotions = pd.read_csv("emotions.csv")
+#emotions = pd.read_csv("dataset/emotions.csv")
+emotions = pd.read_csv("dataset/bookmarks.csv")
 print("Shape of dataset: {}".format(emotions.shape))
 
 
 #Model parameters
-learning_rate = 0.00005
-training_epochs = 5000
+learning_rate = 0.0001 #emotions:0.00005, bookmarks: 0.0001 
+training_epochs = 100 #emotions:5000, bookmarks: 50
 
-num_inputs = 72
-num_outputs = 6
+num_inputs = 2150 #emotions: 72, bookmarks: 2150
+num_outputs = 208 #emotions:6, bookmarks: 208
 batch_size = 32
 layer1_nodes = 50
 layer2_nodes = 50
