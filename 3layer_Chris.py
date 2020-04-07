@@ -1,3 +1,4 @@
+import random
 import numpy as np
 import pandas as pd
 import os
@@ -6,6 +7,13 @@ from sklearn.utils import class_weight
 from keras import backend as K
 import datetime
 import matplotlib.pyplot as plt
+
+#Fix random seed for keras reproducibility
+seed_value = 42
+os.environ['PYTHONHASHSEED']=str(seed_value)
+np.random.seed(seed_value)
+tf.random.set_seed(seed_value)
+random.seed(seed_value)
 
 def recall(y_true, y_pred):
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
@@ -26,11 +34,13 @@ def f1(y_true, y_pred):
 
 def propensityLoss(p):
     def pLoss(y_true, y_pred):
-        loss = tf.reduce_sum((1.0 / p) * tf.math.abs(2.0 * tf.cast(tf.equal(y_true, y_pred), tf.float32) - 1.0) * tf.math.pow(y_true-y_pred, 2))
         ones = tf.ones_like(y_pred)
         zeros = tf.zeros_like(y_pred)
-        y_pred = tf.where(tf.greater_equal(y_pred, 0.5), ones, zeros)
-        loss = (1.0 - tf.cast(tf.reduce_all(tf.equal(y_true, y_pred)), tf.float32)) * loss
+        y_pred_rounded = tf.where(tf.greater_equal(y_pred, 0.5), ones, zeros)
+
+        loss = tf.reduce_mean((1.0 / p) * (1.0 - (y_true * y_pred_rounded)) * tf.math.pow(y_true-y_pred, 2))
+        
+        loss = (1.0 - tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred_rounded), tf.float32))) * loss
         return loss
     return pLoss
 
@@ -43,17 +53,17 @@ if not os.path.isdir(folderDir):
     os.makedirs(folderDir)
     
 #loading dataset
-#emotions = pd.read_csv("dataset/emotions.csv")
-emotions = pd.read_csv("dataset/bookmarks.csv")
-print("Shape of dataset: {}".format(emotions.shape))
+data = pd.read_csv("dataset/emotions.csv")
+#data = pd.read_csv("dataset/bookmarks.csv")
+print("Shape of dataset: {}".format(data.shape))
 
 
 #Model parameters
 learning_rate = 0.0001 #emotions:0.00005, bookmarks: 0.0001 
-training_epochs = 100 #emotions:5000, bookmarks: 50
+training_epochs = 5000 #emotions:5000, bookmarks: 100
 
-num_inputs = 2150 #emotions: 72, bookmarks: 2150
-num_outputs = 208 #emotions:6, bookmarks: 208
+num_inputs = 72 #emotions: 72, bookmarks: 2150
+num_outputs = 6 #emotions:6, bookmarks: 208
 batch_size = 32
 layer1_nodes = 50
 layer2_nodes = 50
@@ -62,7 +72,7 @@ layer3_nodes = 100
 
 #train test split
 from sklearn.model_selection import train_test_split
-train, test = train_test_split(emotions, random_state=42, test_size=0.20, shuffle=True)
+train, test = train_test_split(data, random_state=42, test_size=0.20, shuffle=True)
 
 x_train = train.iloc[:,:num_inputs].to_numpy()
 y_train = train.iloc[:,-num_outputs:].to_numpy()
@@ -77,10 +87,12 @@ y_test = np.float32(y_test)
 #Calculate propensity
 N = len(x_train)
 L = num_outputs
+A = 0.55 
+B = 1.5
 propensity = []
 for i in range(L):
     Nl = np.count_nonzero(y_train[:,i])
-    propensity.append(1.0 / (1.0 + tf.math.log(N-1.0)*(1.183)*tf.math.exp(-0.5*tf.math.log(Nl + 0.4))))
+    propensity.append(1.0 / (1.0 + tf.math.log(N-1.0)*tf.math.pow(1.0+B, A)*tf.math.exp(-A*tf.math.log(Nl + B))))
 propensity = np.array(propensity)
 
 model = tf.keras.Sequential()
