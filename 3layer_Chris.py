@@ -27,6 +27,10 @@ def f1(y_true, y_pred):
 def propensityLoss(p):
     def pLoss(y_true, y_pred):
         loss = tf.reduce_sum((1.0 / p) * tf.math.abs(2.0 * tf.cast(tf.equal(y_true, y_pred), tf.float32) - 1.0) * tf.math.pow(y_true-y_pred, 2))
+        ones = tf.ones_like(y_pred)
+        zeros = tf.zeros_like(y_pred)
+        y_pred = tf.where(tf.greater_equal(y_pred, 0.5), ones, zeros)
+        loss = (1.0 - tf.cast(tf.reduce_all(tf.equal(y_true, y_pred)), tf.float32)) * loss
         return loss
     return pLoss
 
@@ -44,8 +48,8 @@ print("Shape of dataset: {}".format(emotions.shape))
 
 
 #Model parameters
-learning_rate = 0.0001
-training_epochs = 2000
+learning_rate = 0.00005
+training_epochs = 5000
 
 num_inputs = 72
 num_outputs = 6
@@ -53,12 +57,6 @@ batch_size = 32
 layer1_nodes = 50
 layer2_nodes = 50
 layer3_nodes = 100
-
-#feature scaling
-from sklearn.preprocessing import MinMaxScaler
-x_scaler = MinMaxScaler(feature_range=(0,1))
-feature_columns = emotions.iloc[:,:num_inputs].columns
-emotions[feature_columns] =  np.float32(x_scaler.fit_transform(emotions[feature_columns]))
 
 
 #train test split
@@ -117,7 +115,6 @@ history = model.fit(x=x_train,
 
 
 y_pred = model.predict(x_test)
-print("min: {}, max: {}".format(np.amin(y_pred),np.amax(y_pred)))
 
 y_pred = np.where(y_pred >= 0.5, 1.0, 0.0)
 
