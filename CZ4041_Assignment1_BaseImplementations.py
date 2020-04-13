@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[117]:
+# In[55]:
 
 
 from sklearn.linear_model import LogisticRegression
@@ -24,6 +24,30 @@ import skmultilearn.adapt as skadapt
 import sklearn.metrics as metrics
 from sklearn import preprocessing
 
+def FindBestMNBParams(classif, dataset_train_x, dataset_train_y):
+    rangefloat = [round(x * 0.1, 1) for x in range(1, 11)]
+    parameters = {
+        'classifier__alpha': rangefloat,
+    }
+    clf = GridSearchCV(classif, parameters, scoring=make_scorer(metrics.hamming_loss,greater_is_better=False), n_jobs=2)
+    clf.fit(dataset_train_x, dataset_train_y)
+    print(clf.best_params_)
+    #print(pd.DataFrame(clf.cv_results_))
+    
+    return clf.best_params_
+
+def FindBestSVCParams(classif, dataset_train_x, dataset_train_y):
+    rangefloat = [round(x * 0.1, 1) for x in range(1, 11)]
+    parameters = {
+        'classifier__alpha': rangefloat,
+    }
+    clf = GridSearchCV(classif, parameters, scoring=make_scorer(metrics.hamming_loss,greater_is_better=False), n_jobs=2)
+    clf.fit(dataset_train_x, dataset_train_y)
+    print(clf.best_params_)
+    #print(pd.DataFrame(clf.cv_results_))
+    
+    return clf.best_params_
+
 def BinaryRelevance(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y):
     classifier = skpt.BinaryRelevance(GaussianNB())
     get_ipython().run_line_magic('timeit', 'classifier.fit(dataset_train_x, dataset_train_y)')
@@ -38,12 +62,20 @@ def BinaryRelevanceSVC(dataset_train_x, dataset_train_y, dataset_test_x, dataset
     
     Metrics_Accuracy("Binary Relevance w/ SVC", predictions ,dataset_test_y)
       
-def BinaryRelevanceMNB(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y):      
+def BinaryRelevanceMNB(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y):
     classifier = skpt.BinaryRelevance(MultinomialNB())
     get_ipython().run_line_magic('timeit', 'classifier.fit(dataset_train_x, dataset_train_y)')
     predictions = classifier.predict(dataset_test_x)
     
-    Metrics_Accuracy("Binary Relevance w/ MNB", predictions ,dataset_test_y)    
+    Metrics_Accuracy("Binary Relevance w/ MNB", predictions ,dataset_test_y)   
+    
+    best_params = FindBestMNBParams(skpt.BinaryRelevance(MultinomialNB()), dataset_train_x, dataset_train_y)
+    
+    classifier = skpt.BinaryRelevance(MultinomialNB(alpha = best_params['classifier__alpha']))
+    get_ipython().run_line_magic('timeit', 'classifier.fit(dataset_train_x, dataset_train_y)')
+    predictions = classifier.predict(dataset_test_x)
+    
+    Metrics_Accuracy("Binary Relevance w/ MNB w/ tune", predictions ,dataset_test_y)   
     
 def ClassifierChain(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y):
     classifier = skpt.ClassifierChain(GaussianNB())
@@ -148,7 +180,7 @@ def MLkNN(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y,num_n
     get_ipython().run_line_magic('timeit', 'classifier.fit(x_train,y_train)')
     predictions = classifier.predict(x_test)
     
-    text = "MLkNN w/ k=" + str(num_neighbours)
+    text = "MLkNN w/ k=" + str(num_neighbours) + " s="+str(smoothing_param)
     
     Metrics_Accuracy(text, predictions ,dataset_test_y)
     
@@ -204,6 +236,32 @@ def LabelSpacePartitioningClassifier(dataset_train_x, dataset_train_y, dataset_t
     
     Metrics_Accuracy("Label Space Partition", predictions ,dataset_test_y)
 
+def BRkNNa(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y, num_neighbours):
+    x_train = lil_matrix(dataset_train_x).toarray()
+    y_train = lil_matrix(dataset_train_y).toarray()
+    x_test = lil_matrix(dataset_test_x).toarray()
+    
+    classifier = skadapt.BRkNNaClassifier(k=num_neighbours)
+    get_ipython().run_line_magic('timeit', 'classifier.fit(x_train,y_train)')
+    predictions = classifier.predict(x_test)
+    
+    text = "BRkNNa w/ k=" + str(num_neighbours)
+    
+    Metrics_Accuracy(text, predictions ,dataset_test_y)
+    
+def BRkNNb(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y, num_neighbours):
+    x_train = lil_matrix(dataset_train_x).toarray()
+    y_train = lil_matrix(dataset_train_y).toarray()
+    x_test = lil_matrix(dataset_test_x).toarray()
+    
+    classifier = skadapt.BRkNNbClassifier(k=num_neighbours)
+    get_ipython().run_line_magic('timeit', 'classifier.fit(x_train,y_train)')
+    predictions = classifier.predict(x_test)
+    
+    text = "BRkNNb w/ k=" + str(num_neighbours)
+    
+    Metrics_Accuracy(text, predictions ,dataset_test_y)
+    
 def EmbeddingClassifierMethod(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y):
     classifier = EmbeddingClassifier(
         SKLearnEmbedder(SpectralEmbedding(n_components=10)),
@@ -238,11 +296,14 @@ def Util_ClassifierMethods(dataset_train_x,dataset_train_y,dataset_test_x,datase
     LabelPowerset(dataset_train_x,dataset_train_y,dataset_test_x,dataset_test_y)
     
 #estimating best params using hamming loss for multi label problems
-def FindBestK(dataset_train_x, dataset_train_y):
-    rangefloatv = [round(x * 0.1, 1) for x in range(5, 10)]
-    parameters = {'k': range(1,5), 's': rangefloatv}
+def FindBestK(classif, dataset_train_x, dataset_train_y):
+    rangefloatv = [round(x * 0.1, 1) for x in range(5, 11)]
+    
+    parameters = {'k': range(1,20), 's': rangefloatv} 
+    if type(classif) == type(skadapt.BRkNNaClassifier()) or type(classif) == type(skadapt.BRkNNbClassifier()):
+        parameters = {'k': range(1,20)}
 
-    clf = GridSearchCV(skadapt.MLkNN(), parameters, scoring=make_scorer(metrics.hamming_loss,greater_is_better=False), n_jobs=2)
+    clf = GridSearchCV(classif, parameters, scoring=make_scorer(metrics.hamming_loss,greater_is_better=False), n_jobs=2)
     clf.fit(lil_matrix(dataset_train_x).toarray(), lil_matrix(dataset_train_y).toarray())
     print(clf.best_params_)
     return clf.best_params_
@@ -258,7 +319,7 @@ def FindBestVT(dataset_train_x, dataset_train_y):
     return clf.best_params_
 
 
-# In[118]:
+# In[56]:
 
 
 #birds
@@ -319,7 +380,7 @@ dataset_test_x_yeast = dataset_test_yeast.iloc[:,0:103]
 dataset_test_y_yeast = dataset_test_yeast.iloc[:,-14:]
 
 
-# In[119]:
+# In[57]:
 
 
 #Binary Relevance
@@ -331,22 +392,6 @@ BinaryRelevance(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x
 print("Yeast dataset")
 BinaryRelevance(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast)
 
-print("%Comparison Binary Relevance SVC%")
-print("Bird dataset")
-BinaryRelevanceSVC(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird)
-print("Emotions dataset")
-BinaryRelevanceSVC(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions)
-print("Yeast dataset")
-BinaryRelevanceSVC(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast)
-
-print("%Comparison Binary Relevance MNB%")
-print("Bird dataset")
-BinaryRelevanceMNB(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird)
-print("Emotions dataset")
-BinaryRelevanceMNB(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions)
-print("Yeast dataset")
-BinaryRelevanceMNB(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast)
-
 # print("%Comparison Binary Relevance Grid Search CV%")
 # print("Bird dataset")
 # BinaryRelevanceCV(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird)
@@ -356,7 +401,31 @@ BinaryRelevanceMNB(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_ye
 # BinaryRelevanceCV(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast)
 
 
-# In[120]:
+# In[58]:
+
+
+print("%Comparison Binary Relevance SVC%")
+print("Bird dataset")
+BinaryRelevanceSVC(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird)
+print("Emotions dataset")
+BinaryRelevanceSVC(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions)
+print("Yeast dataset")
+BinaryRelevanceSVC(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast)
+
+
+# In[59]:
+
+
+print("%Comparison Binary Relevance MNB%")
+print("Bird dataset")
+BinaryRelevanceMNB(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird)
+print("Emotions dataset")
+BinaryRelevanceMNB(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions)
+print("Yeast dataset")
+BinaryRelevanceMNB(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast)
+
+
+# In[60]:
 
 
 #Classifier Chain
@@ -385,7 +454,7 @@ print("Yeast dataset")
 ClassifierChainMNB(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast)
 
 
-# In[121]:
+# In[61]:
 
 
 #Label Powerset
@@ -420,7 +489,7 @@ LabelPowersetMNB(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeas
 
 
 
-# In[122]:
+# In[62]:
 
 
 #Test other methods
@@ -429,7 +498,7 @@ RAkELd(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions
 RAkELd(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,14)
 
 
-# In[123]:
+# In[63]:
 
 
 #Test other methods
@@ -438,38 +507,40 @@ RAkELO(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions
 RAkELO(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,14)
 
 
-# In[124]:
+# In[64]:
 
 
 #Adapted Algorithms
-#MLkNN with k =3
+#MLkNN with k =10 (default) smoothing_param = 1
+k = 10
+s = 1
 print("MLkNN")
 print("Bird dataset")
-MLkNN(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird,3,1)
+MLkNN(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird,k,s)
 print("Emotions dataset")
-MLkNN(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions,3,1)
+MLkNN(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions,k,s)
 print("Yeast dataset")
-MLkNN(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,3,1)
+MLkNN(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,k,s)
 
 
-# In[125]:
+# In[65]:
 
 
 #Adapted Algorithms
 #MLkNN with Find the best K
 print("MLkNN")
 print("Bird dataset")
-dict_res = FindBestK(dataset_train_x_bird, dataset_train_y_bird)
+dict_res = FindBestK(skadapt.MLkNN(),dataset_train_x_bird, dataset_train_y_bird)
 MLkNN(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird,dict_res['k'],dict_res['s'])
 print("Emotions dataset")
-dict_res= FindBestK(dataset_train_x_emotions,dataset_train_y_emotions)
+dict_res= FindBestK(skadapt.MLkNN(), dataset_train_x_emotions,dataset_train_y_emotions)
 MLkNN(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions,dict_res['k'],dict_res['s'])
 print("Yeast dataset")
-dict_res= FindBestK(dataset_train_x_yeast,dataset_train_y_yeast)
+dict_res= FindBestK(skadapt.MLkNN(), dataset_train_x_yeast,dataset_train_y_yeast)
 MLkNN(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,dict_res['k'],dict_res['s'])
 
 
-# In[126]:
+# In[66]:
 
 
 #MLARAM
@@ -484,7 +555,7 @@ print("Yeast dataset")
 MLARAM(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,v,t)
 
 
-# In[127]:
+# In[67]:
 
 
 #MLARAM with tuning
@@ -500,7 +571,71 @@ dict_res = FindBestVT(dataset_train_x_yeast,dataset_train_y_yeast)
 MLARAM(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,dict_res['vigilance'],dict_res['threshold'])
 
 
-# In[128]:
+# In[68]:
+
+
+#Adapted Algorithms
+#BRkNNa with k = 10 (default)
+k = 10
+print("BRkNNa")
+print("Bird dataset")
+BRkNNa(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird,k)
+print("Emotions dataset")
+BRkNNa(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions,k)
+print("Yeast dataset")
+BRkNNa(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,k)
+
+
+# In[69]:
+
+
+#Adapted Algorithms
+#BRkNNa with Find the best K
+print("BRkNNa tuned")
+print("Bird dataset")
+dict_res = FindBestK(skadapt.BRkNNaClassifier(), dataset_train_x_bird, dataset_train_y_bird)
+BRkNNa(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird,dict_res['k'])
+print("Emotions dataset")
+dict_res= FindBestK(skadapt.BRkNNaClassifier(), dataset_train_x_emotions,dataset_train_y_emotions)
+BRkNNa(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions,dict_res['k'])
+print("Yeast dataset")
+dict_res= FindBestK(skadapt.BRkNNaClassifier(), dataset_train_x_yeast,dataset_train_y_yeast)
+BRkNNa(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,dict_res['k'])
+
+
+# In[70]:
+
+
+#Adapted Algorithms
+#BRkNNb with k = 10 (default)
+k = 10
+print("BRkNNb")
+print("Bird dataset")
+BRkNNb(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird,k)
+print("Emotions dataset")
+BRkNNb(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions,k)
+print("Yeast dataset")
+BRkNNb(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,k)
+
+
+# In[71]:
+
+
+#Adapted Algorithms
+#BRkNNb with Find the best K
+print("BRkNNb tuned")
+print("Bird dataset")
+dict_res = FindBestK(skadapt.BRkNNbClassifier(), dataset_train_x_bird, dataset_train_y_bird)
+BRkNNb(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird,dict_res['k'])
+print("Emotions dataset")
+dict_res= FindBestK(skadapt.BRkNNbClassifier(), dataset_train_x_emotions,dataset_train_y_emotions)
+BRkNNb(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions,dict_res['k'])
+print("Yeast dataset")
+dict_res= FindBestK(skadapt.BRkNNbClassifier(), dataset_train_x_yeast,dataset_train_y_yeast)
+BRkNNb(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,dict_res['k'])
+
+
+# In[72]:
 
 
 #todo label relations exploration
@@ -512,7 +647,7 @@ print("Yeast dataset")
 LabelSpacePartitioningClassifier(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast)
 
 
-# In[129]:
+# In[73]:
 
 
 #Embedded Classifier
@@ -524,10 +659,17 @@ print("Yeast dataset")
 EmbeddingClassifierMethod(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast)
 
 
-# In[130]:
+# In[74]:
 
 
 rangefloat = [round(x * 0.01, 2) for x in range(1, 5)]
+print(rangefloat)
+
+
+# In[75]:
+
+
+rangefloat = [round(x * 0.1, 1) for x in range(1, 11)]
 print(rangefloat)
 
 
