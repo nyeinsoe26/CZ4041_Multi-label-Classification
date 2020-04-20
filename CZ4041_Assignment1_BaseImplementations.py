@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[68]:
+# In[5]:
 
 
 from sklearn.linear_model import LogisticRegression
@@ -23,35 +23,6 @@ import numpy as np
 import skmultilearn.adapt as skadapt
 import sklearn.metrics as metrics
 from sklearn import preprocessing
-
-def FindBestMNBParams(classif, dataset_train_x, dataset_train_y):
-    rangefloat = [round(x * 0.1, 1) for x in range(1, 11)]
-    parameters = {
-        'classifier': [MultinomialNB()],
-        'classifier__alpha': rangefloat,
-    }
-    clf = GridSearchCV(classif, parameters, scoring=make_scorer(metrics.hamming_loss,greater_is_better=False), n_jobs=3)
-    clf.fit(dataset_train_x, dataset_train_y)
-    print(clf.best_params_)
-    #print(pd.DataFrame(clf.cv_results_))
-    
-    return clf.best_params_
-
-def FindBestSVCParams(classif, dataset_train_x, dataset_train_y):
-    parameters = {
-            'classifier': [SVC()],
-            'classifier__degree': [2,3,4],
-            'classifier__kernel': ['linear','poly','rbf'],
-            #'classifier__max_iter': [10000],
-            #'classifier__loss': ['hinge','squared_hinge'],
-    }
-    
-    clf = GridSearchCV(classif, parameters, scoring=make_scorer(metrics.hamming_loss,greater_is_better=False), n_jobs=3)
-    clf.fit(dataset_train_x, dataset_train_y)
-    print(clf.best_params_)
-    #print(pd.DataFrame(clf.cv_results_))
-    
-    return clf.best_params_
 
 def BinaryRelevance(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y, base_classif, title):
     #print(base_classif)
@@ -174,6 +145,15 @@ def EmbeddingClassifierMethod(dataset_train_x, dataset_train_y, dataset_test_x, 
     predictions = classifier.predict(dataset_test_x)
 
     Metrics_Accuracy("Embedded Classifier", predictions ,dataset_test_y)
+
+def TwinMLSVM(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y,nc_k, omega):
+    classifier = skadapt.MLTSVM(c_k = nc_k, sor_omega = omega)
+    classifier.fit(csr_matrix(dataset_train_x),csr_matrix(dataset_train_y))
+    predictions = classifier.predict(csr_matrix(dataset_test_x))
+    
+    Metrics_Accuracy("MLTSVM", predictions ,dataset_test_y)
+
+
     
 def Metrics_Accuracy(classifier,predictions,dataset_test_y):
     #results
@@ -196,6 +176,36 @@ def Util_ClassifierMethods(dataset_train_x,dataset_train_y,dataset_test_x,datase
     ClassifierChain(dataset_train_x,dataset_train_y,dataset_test_x,dataset_test_y)
     ClassifierChainCV(dataset_train_x,dataset_train_y,dataset_test_x,dataset_test_y)
     LabelPowerset(dataset_train_x,dataset_train_y,dataset_test_x,dataset_test_y)
+
+def FindBestMNBParams(classif, dataset_train_x, dataset_train_y):
+    rangefloat = [round(x * 0.1, 1) for x in range(1, 11)]
+    parameters = {
+        'classifier': [MultinomialNB()],
+        'classifier__alpha': rangefloat,
+    }
+    clf = GridSearchCV(classif, parameters, scoring=make_scorer(metrics.hamming_loss,greater_is_better=False), n_jobs=3)
+    clf.fit(dataset_train_x, dataset_train_y)
+    print(clf.best_params_)
+    #print(pd.DataFrame(clf.cv_results_))
+    
+    return clf.best_params_
+
+def FindBestSVCParams(classif, dataset_train_x, dataset_train_y):
+    parameters = {
+            'classifier': [SVC()],
+            'classifier__degree': [2,3,4],
+            'classifier__kernel': ['linear','poly','rbf'],
+            #'classifier__max_iter': [10000],
+            #'classifier__loss': ['hinge','squared_hinge'],
+    }
+    
+    clf = GridSearchCV(classif, parameters, scoring=make_scorer(metrics.hamming_loss,greater_is_better=False), n_jobs=3)
+    clf.fit(dataset_train_x, dataset_train_y)
+    print(clf.best_params_)
+    #print(pd.DataFrame(clf.cv_results_))
+    
+    return clf.best_params_    
+    
     
 #estimating best params using hamming loss for multi label problems
 def FindBestK(classif, dataset_train_x, dataset_train_y):
@@ -217,6 +227,19 @@ def FindBestVT(dataset_train_x, dataset_train_y):
 
     clf = GridSearchCV(skadapt.MLARAM(), parameters, scoring=make_scorer(metrics.hamming_loss,greater_is_better=False), n_jobs=2)
     clf.fit(lil_matrix(dataset_train_x).toarray(), lil_matrix(dataset_train_y).toarray())
+    print(clf.best_params_)
+    return clf.best_params_
+
+def FindCKParam(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y):
+    rangev = [2**i for i in range(-5, 3, 2)]
+    #introduce back 0 default to rangev
+    rangev = rangev+ [0]
+    rangefloat = [round(x * 0.1, 1) for x in range(1, 11)]    
+    #rangefloat2 = [1e-06, 1e-05]
+    parameters = {'c_k': rangev, 'sor_omega': rangefloat} 
+    
+    clf = GridSearchCV(skadapt.MLTSVM(), parameters, scoring=make_scorer(metrics.hamming_loss,greater_is_better=False), n_jobs=4)
+    clf.fit(csr_matrix(dataset_train_x),csr_matrix(dataset_train_y))
     print(clf.best_params_)
     return clf.best_params_
 
@@ -295,7 +318,7 @@ def GridSearchCV_baseRakel(classif, dataset_train_x, dataset_train_y):
     return classifier.best_params_
 
 
-# In[69]:
+# In[2]:
 
 
 #birds
@@ -799,43 +822,35 @@ print("Yeast dataset")
 EmbeddingClassifierMethod(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast)
 
 
-# In[98]:
+# In[12]:
 
 
-rangefloat = [round(x * 0.01, 2) for x in range(1, 5)]
-print(rangefloat)
+print("Bird dataset")   
+TwinMLSVM(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird,0.5,1)
+dict_res = FindCKParam(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird)
+TwinMLSVM(dataset_train_x_bird, dataset_train_y_bird, dataset_test_x_bird, dataset_test_y_bird,dict_res['c_k'],dict_res['sor_omega'])
+print("Emotions dataset")
+TwinMLSVM(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions,0.5,1)
+dict_res = FindCKParam(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions)
+TwinMLSVM(dataset_train_x_emotions,dataset_train_y_emotions,dataset_test_x_emotions,dataset_test_y_emotions,dict_res['c_k'],dict_res['sor_omega'])
+print("Yeast dataset")
+TwinMLSVM(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,0.5,1)
+dict_res = FindCKParam(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast)
+TwinMLSVM(dataset_train_x_yeast,dataset_train_y_yeast,dataset_test_x_yeast,dataset_test_y_yeast,dict_res['c_k'],dict_res['sor_omega'])
 
 
-# In[99]:
+# In[22]:
 
 
-rangefloat = [round(x * 0.1, 1) for x in range(1, 11)]
-print(rangefloat)
+print([2**i for i in range(-5, 4, 2)])
 
 
-# In[100]:
+# In[11]:
 
 
-xx = list(range(1,11))
-print(xx)
-
-
-# In[101]:
-
-
-list(range(2,10))
-
-
-# In[102]:
-
-
-print ([x*2 for x in range(1,10)])
-
-
-# In[103]:
-
-
-[round(x * 0.1, 1) for x in range(1, 11)]
+ranges = [2**i for i in range(-5, 3, 2)]
+ranges = ranges + [0]
+print(ranges)
 
 
 # In[ ]:
