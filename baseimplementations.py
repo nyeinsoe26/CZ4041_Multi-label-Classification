@@ -434,6 +434,13 @@ def Util_ClassifierMethods(dataset_train_x,dataset_train_y,dataset_test_x,datase
     dict_res = FindCKParam(dataset_train_x,dataset_train_y,dataset_test_x,dataset_test_y)
     TwinMLSVM(dataset_train_x,dataset_train_y,dataset_test_x,dataset_test_y,dict_res['c_k'],dict_res['sor_omega'])
 
+#Fix random seed for keras reproducibility
+seed_value = 42
+os.environ['PYTHONHASHSEED']=str(seed_value)
+np.random.seed(seed_value)
+tf.random.set_seed(seed_value)
+random.seed(seed_value)
+
 datasets = ['emotions', 'bookmarks', 'yeast']
 numinputoutputs = [[72, 6], [2150, 208], [103, 14]]
 
@@ -443,7 +450,7 @@ for (dataset, [num_in, num_out]) in zip(datasets, numinputoutputs):
     ds = pd.read_csv(os.path.join("datasets", dataset+".csv"))
     ds_length = len(ds.index)
     #train test split
-    train, test = train_test_split(ds, random_state=42, test_size=0.20, shuffle=True)
+    train, test = train_test_split(ds, random_state=seed_value, test_size=0.20, shuffle=True)
     x_train = train.iloc[:,0:num_in]
     y_train = train.iloc[:,-num_out:]
     x_test = test.iloc[:,0:num_in]
