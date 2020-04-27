@@ -19,6 +19,7 @@ The codes can generally be run in any operating system, however, Ubuntu 18.04 or
 | skmultilearn (scikit-multilearn)| 0.2.0 |
 | tensorflow | ≥ 1.14.0 |
 | keras | ≥ 2.3.1 |
+
 Packages can be installed by entering "pip install [package_name]" at the terminal without the enclosing square brackets. An example is as follows. 
 ```
 pip install numpy
