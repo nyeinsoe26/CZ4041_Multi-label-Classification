@@ -15,6 +15,7 @@ from sklearn.metrics import make_scorer
 import skmultilearn.problem_transform as skpt
 import pandas as pd
 import numpy as np
+import random
 import time
 import os
 import skmultilearn.adapt as skadapt
@@ -438,7 +439,6 @@ def Util_ClassifierMethods(dataset_train_x,dataset_train_y,dataset_test_x,datase
 seed_value = 42
 os.environ['PYTHONHASHSEED']=str(seed_value)
 np.random.seed(seed_value)
-tf.random.set_seed(seed_value)
 random.seed(seed_value)
 
 datasets = ['emotions', 'bookmarks', 'yeast']
