@@ -213,7 +213,7 @@ for (dataset, [num_in, num_out]) in zip(datasets, numinputoutputs):
         ax.text(rect.get_x() + rect.get_width()/2., height,
                 '%0.3f' %(height),
                 ha='center', va='bottom')
-    plt.xticks(rotation = 45)
+    plt.xticks(rotation = -45)
     plt.savefig(os.path.join('figures', '[{}] Hamming loss comparison.png'.format(dataset)))
     plt.clf()
 
@@ -229,7 +229,7 @@ for (dataset, [num_in, num_out]) in zip(datasets, numinputoutputs):
         ax.text(rect.get_x() + rect.get_width()/2, height,
                 '%0.3f' %(height),
                 ha='center', va='bottom')
-    plt.xticks(rotation = 45)
+    plt.xticks(rotation = -45)
     plt.savefig(os.path.join('figures', '[{}] Exact match comparison.png'.format(dataset)))
     plt.clf()
 
@@ -245,7 +245,7 @@ for (dataset, [num_in, num_out]) in zip(datasets, numinputoutputs):
         ax.text(rect.get_x() + rect.get_width()/2, height,
                 '%0.3f' %(height),
                 ha='center', va='bottom')
-    plt.xticks(rotation = 45)
+    plt.xticks(rotation = -45)
     plt.savefig(os.path.join('figures', '[{}] Execution time comparison.png'.format(dataset)))
     plt.clf()
 
@@ -257,7 +257,7 @@ for (dataset, [num_in, num_out]) in zip(datasets, numinputoutputs):
     plt.ylabel('Training loss')
     plt.xlabel('Epoch')
     plt.legend(model_names, loc='upper right')
-    plt.xticks(rotation = 45)
+    plt.xticks(rotation = -45)
     plt.savefig(os.path.join('figures', '[{}] Training loss comparison.png'.format(dataset)))
     plt.clf()
 
@@ -269,7 +269,7 @@ for (dataset, [num_in, num_out]) in zip(datasets, numinputoutputs):
     plt.ylabel('Validation loss')
     plt.xlabel('Epoch')
     plt.legend(model_names, loc='upper right')
-    plt.xticks(rotation = 45)
+    plt.xticks(rotation = -45)
     plt.savefig(os.path.join('figures', '[{}] Validation loss comparison.png'.format(dataset)))
     plt.clf()
 
@@ -280,7 +280,7 @@ for (dataset, [num_in, num_out]) in zip(datasets, numinputoutputs):
     plt.ylabel('Training accuracy')
     plt.xlabel('Epoch')
     plt.legend(model_names, loc='lower right')
-    plt.xticks(rotation = 45)
+    plt.xticks(rotation = -45)
     plt.savefig(os.path.join('figures', '[{}] Training accuracy comparison.png'.format(dataset)))
     plt.clf()
 
@@ -291,7 +291,7 @@ for (dataset, [num_in, num_out]) in zip(datasets, numinputoutputs):
     plt.ylabel('Validation accuracy')
     plt.xlabel('Epoch')
     plt.legend(model_names, loc='lower right')
-    plt.xticks(rotation = 45)
+    plt.xticks(rotation = -45)
     plt.savefig(os.path.join('figures', '[{}] Validation accuracy comparison.png'.format(dataset)))
     plt.clf()
 
@@ -370,7 +370,7 @@ for (dataset, [num_in, num_out]) in zip(datasets, numinputoutputs):
         ax.text(rect.get_x() + rect.get_width()/2, height,
                 '%0.3f' %(height),
                 ha='center', va='bottom')
-    plt.xticks(rotation = 45)
+    plt.xticks(rotation = -45)
     plt.savefig(os.path.join('figures', '[{}][After PCA] Execution time comparison.png'.format(dataset)))
     plt.clf()
 
@@ -386,7 +386,7 @@ for (dataset, [num_in, num_out]) in zip(datasets, numinputoutputs):
         ax.text(rect.get_x() + rect.get_width()/2, height,
                 '%0.3f' %(height),
                 ha='center', va='bottom')
-    plt.xticks(rotation = 45)
+    plt.xticks(rotation = -45)
     plt.savefig(os.path.join('figures', '[{}][After PCA] Hamming loss comparison.png'.format(dataset)))
     plt.clf()
 
@@ -402,6 +402,6 @@ for (dataset, [num_in, num_out]) in zip(datasets, numinputoutputs):
         ax.text(rect.get_x() + rect.get_width()/2, height,
                 '%0.3f' %(height),
                 ha='center', va='bottom')
-    plt.xticks(rotation = 45)
+    plt.xticks(rotation = -45)
     plt.savefig(os.path.join('figures', '[{}][After PCA] Exact match accuracy comparison.png'.format(dataset)))
     plt.clf()
