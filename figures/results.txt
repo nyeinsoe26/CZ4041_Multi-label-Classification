@@ -1,7 +1,0 @@
-bookmarks:
-Exact match score (Whole row must match): 0.19787161393125427
-Hamming score (Individual label predictions): 0.9910445376385508
-
-emotions:
-Exact match score (Whole row must match): 0.2773109243697479
-Hamming score (Individual label predictions): 0.7899159663865546
