@@ -1,7 +1,7 @@
 # CZ4041 group assignment
 ## Project overview
 In this project, we have opted to implement the multi-label classification task. We will be using "emotions", "yeast" and "bookmark" datasets to assess the performance of the respective classifiers. The datasets are obtained from [https://sci2s.ugr.es/keel/multilabel.php].  
-There are 3 python files submitted.
+There are 3 python files submitted.  
 | file | Description |
 | ------ | ------ |
 | EDA.py | Performs EDA on the datasets  |
@@ -9,7 +9,7 @@ There are 3 python files submitted.
 | neuralnet.py | This file contains the implementation of our proposed solution to address the multi-label classification task. |
 
 ## Tools and envrionment
-The codes can generally be run in any operating system, however, Ubuntu 18.04 or 17.04 is recommended. Additionally, the following libraries are required.
+The codes can generally be run in any operating system, however, Ubuntu 18.04 or 17.04 is recommended. Additionally, the following libraries are required.  
 | libraries | Version |
 | ------ | ------ |
 | numpy | ≥ 1.18.1  |
