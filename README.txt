@@ -35,6 +35,7 @@ Index 0 corresponds to "emotions dataset, index 1 corresponds to "yeast" dataset
 perform EDA on the desired dataset. Once selected, simply run the program in desired IDE. For better visualization, it is recommended to run the EDA.ipynb. 
 For a more detailed explanation on how to extract information from respective boxplots and data distribution plots, refer to EDA_emotions.ipynb.
 
+<<<<<<< HEAD
 ### 3.2 Metric used to measure performance
 In this project, the following 3 metrics were are used to assess the performance of the respective classifiers.
 
@@ -113,6 +114,14 @@ In this project, 2 loss functions were implemented.
 
 
 ### 3.4 Base Implementation
+=======
+### Proposed model
+
+
+
+
+### Base Implementation
+>>>>>>> 6324dfad67187a263dd0940c688782ca25c51e27
 Variable name used in the subsequent sections
 	a. dataset_train_x - attributes
 	b. dataset_train_y - labels
@@ -159,15 +168,24 @@ For simplification, these methods and its relevant parameter tuning steps can be
 
 Prior to calling the method, each dataset has its individual method to perform scaling, train-test data split. Util_ClassifierMethods method contains a prior GridSearchCV method to find optimal parameters which will subsequently be used as the input for each SOTA method implemented. 
 
+<<<<<<< HEAD
 ## 4. Experiment Settings
 ### 4.1 Approach
+=======
+## Experiment Settings
+### Approach
+>>>>>>> 6324dfad67187a263dd0940c688782ca25c51e27
 As mentioned in Base Implmentation, the replication of results can be done through Util_ClassifierMethods method. The experiment settings approach used are as follow:
 	1. 80-20 split of dataset for train/ test split.
 	2. Scaling is done in the range of 0-1.
 	3. Optimal parameter tuning through relevant GridSearchCV methods.
 	4. Using found parameter as input to relevant classifier methods.
 
+<<<<<<< HEAD
 ### 4.2 Steps
+=======
+### Steps
+>>>>>>> 6324dfad67187a263dd0940c688782ca25c51e27
 	1. For Emotions dataset 
 		1a. Specify the path to Emotions dataset
 		1b. Run LoadEmotionsDataset with path as input. Output of x_train, y_train, x_test and y_train respectively
