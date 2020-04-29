@@ -112,15 +112,7 @@ In this project, 2 loss functions were implemented.
 
 
 
-
 ### 3.4 Base Implementation
-=======
-### Proposed model
-
-
-
-
-### Base Implementation
 Variable name used in the subsequent sections
 	a. dataset_train_x - attributes
 	b. dataset_train_y - labels
