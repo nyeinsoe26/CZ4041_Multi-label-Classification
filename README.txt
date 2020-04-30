@@ -147,10 +147,11 @@ In this project, the following state-of-the-arts (SOTA) methods were implemented
 
 For the base classifiers that will be used by methods of Problem Transformation (PT) domain, the following 3 classifier methods were used.
 	1. Gaussian Naive Bayes
-	2. Multinomial Naive Bayes
+	2. Multinomial Naive Bayes**
 	3. C-Support Vector Classification/ Linear Support Vector Machine*
 
 *Linear Support Vector Machine was used for Bookmarks dataset to reduce training time, instead of C-Support Vector Classification for Random K-labelsets methods.
+**Base classifier Multinomial Naive Bayes requires input to be non-negative ("x" train/test splits). Do take note to scale or check for min before running large datasets to avoid warnings. Example can be shown in Util_ClassifierMethodsBookmarks()
 
 The relevant GridSearchCV used for optimal parameter finding are as follow:
 	1. GridSearchCV_baseRakel(classif, dataset_train_x, dataset_train_y) - for Rakel classifier methods
