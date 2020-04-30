@@ -190,8 +190,9 @@ As mentioned in Base Implmentation, the replication of results can be done throu
 		2a. Specify the path to Yeast dataset
 		2b. Run LoadYeastDatasetwith with path as input. Output of x_train, y_train, x_test and y_train respectively
 		2c. Run Util_ClassifierMethods with the output from LoadEmotionsDataset in the same sequence
-	3. For Bookmarks dataset
+	3. For Bookmarks dataset**
 		3a. Specify the path to Bookmarks dataset
 		3b. Run LoadBookmarksDataset with path as input. Output of x_train, y_train, x_test and y_train respectively
 		3c. Run Util_ClassifierMethodsBookmarks with the output from LoadBookmarksDataset in the same sequence*
 	*As mentioned above, it is recommended to run each method individually to avoid long waiting times, you may just copy the section out and run it.
+	**For base implementation methods other than BR, CC and LP. To reduce complexity and training time needed, only 10% of the sample is used. 
