@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[4]:
+# In[1]:
 
 
 from sklearn.linear_model import LogisticRegression
@@ -24,21 +24,21 @@ from sklearn import preprocessing
 def BinaryRelevance(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y, base_classif, title):
     #print(base_classif)
     classifier = skpt.BinaryRelevance(base_classif)
-    get_ipython().run_line_magic('timeit', 'classifier.fit(dataset_train_x, dataset_train_y)')
+    classifier.fit(dataset_train_x, dataset_train_y)
     predictions = classifier.predict(dataset_test_x)
     
     Metrics_Accuracy(title, predictions ,dataset_test_y)
     
 def ClassifierChain(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y, base_classif, title):
     classifier = skpt.ClassifierChain(base_classif)
-    get_ipython().run_line_magic('timeit', 'classifier.fit(dataset_train_x, dataset_train_y)')
+    classifier.fit(dataset_train_x, dataset_train_y)
     predictions = classifier.predict(dataset_test_x)
     
     Metrics_Accuracy(title, predictions ,dataset_test_y)
 
 def LabelPowerset(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y, base_classif, title):
     classifier = skpt.LabelPowerset(base_classif)
-    get_ipython().run_line_magic('timeit', 'classifier.fit(dataset_train_x, dataset_train_y)')
+    classifier.fit(dataset_train_x, dataset_train_y)
     predictions = classifier.predict(dataset_test_x)
     
     Metrics_Accuracy(title, predictions ,dataset_test_y)
@@ -49,7 +49,7 @@ def MLkNN(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y,num_n
     x_test = lil_matrix(dataset_test_x).toarray()
     
     classifier = skadapt.MLkNN(k=num_neighbours,s=smoothing_param)
-    get_ipython().run_line_magic('timeit', 'classifier.fit(x_train,y_train)')
+    classifier.fit(x_train,y_train)
     predictions = classifier.predict(x_test)
     
     text = "MLkNN w/ k=" + str(num_neighbours) + " s="+str(smoothing_param)
@@ -63,7 +63,7 @@ def MLARAM(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y,num_
     
     #Threshold controls number of prototypes to participate; vigilance controls how large hyperbox is
     classifier = skadapt.MLARAM(threshold = num_threshold, vigilance = num_vigilance)
-    get_ipython().run_line_magic('timeit', 'classifier.fit(x_train,y_train)')
+    classifier.fit(x_train,y_train)
     predictions = classifier.predict(x_test)
     
     text = "MLARAM w/ Threshold = " + str(num_threshold) + ", Vigilance = "+ str(num_vigilance)
@@ -78,7 +78,7 @@ def RAkELd(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y,base
         labelset_size=num_labels
     )
 
-    get_ipython().run_line_magic('timeit', 'classifier.fit(dataset_train_x, dataset_train_y)')
+    classifier.fit(dataset_train_x, dataset_train_y)
     predictions = classifier.predict(dataset_test_x)
     
     Metrics_Accuracy("RAkELd", predictions ,dataset_test_y)
@@ -91,7 +91,7 @@ def RAkELO(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y,base
         model_count=num_models
     )
 
-    get_ipython().run_line_magic('timeit', 'classifier.fit(dataset_train_x, dataset_train_y)')
+    classifier.fit(dataset_train_x, dataset_train_y)
     predictions = classifier.predict(dataset_test_x)
     
     Metrics_Accuracy("RAkELO", predictions ,dataset_test_y)
@@ -103,7 +103,7 @@ def BRkNNa(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y, num
     x_test = lil_matrix(dataset_test_x).toarray()
     
     classifier = skadapt.BRkNNaClassifier(k=num_neighbours)
-    get_ipython().run_line_magic('timeit', 'classifier.fit(x_train,y_train)')
+    classifier.fit(x_train,y_train)
     predictions = classifier.predict(x_test)
     
     text = "BRkNNa w/ k=" + str(num_neighbours)
@@ -116,7 +116,7 @@ def BRkNNb(dataset_train_x, dataset_train_y, dataset_test_x, dataset_test_y, num
     x_test = lil_matrix(dataset_test_x).toarray()
     
     classifier = skadapt.BRkNNbClassifier(k=num_neighbours)
-    get_ipython().run_line_magic('timeit', 'classifier.fit(x_train,y_train)')
+    classifier.fit(x_train,y_train)
     predictions = classifier.predict(x_test)
     
     text = "BRkNNb w/ k=" + str(num_neighbours)
@@ -394,7 +394,8 @@ def Util_ClassifierMethodsBookmarks(train_x, y_train, test_x, y_test):
     #RAkELo
     Util_Title("RAkELo")
     lbs_size = 3
-    mod_count = 4
+    mod_count = 2*y_train.shape[1] #2 * of labels
+    print(mod_count)
     RAkELO(train_x, y_train,test_x, y_test, LinearSVC(max_iter=500,verbose=1),lbs_size,mod_count)
 
     #RAkELd
@@ -504,7 +505,7 @@ def LoadBookmarksDataset(path):
     return train_x, y_train, test_x, y_test
 
 
-# In[8]:
+# In[2]:
 
 
 path = "C:/Users/K/Desktop/Assignment1/"
