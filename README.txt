@@ -31,8 +31,10 @@ In "EDA.py" file, within main() function, adjust the "perform_EDA = dataset[0]" 
 	dataset = ["emotions", "yeast","bookmarks"]
 	perform_EDA = dataset[0]
 
-Index 0 corresponds to "emotions dataset, index 1 corresponds to "yeast" dataset and index 2 corresponds to "bookmarks" dataset. Adjust the index accordingly to 
-perform EDA on the desired dataset. Once selected, simply run the program in desired IDE. For better visualization, it is recommended to run the EDA.ipynb. 
+Index 0 corresponds to "emotions dataset, index 1 corresponds to "yeast" dataset and index 2 corresponds to "bookmarks" dataset. 
+(Note: It is recommended to put the datasets in the same directory as the python files before testing, else, set the path in EDA.py at line 198 
+	"emotions = pd.read_csv("emotions.csv")" to "emotions = pd.read_csv("path_to_file\emotions.csv")")
+Adjust the index accordingly to perform EDA on the desired dataset. Once selected, simply run the program in desired IDE. For better visualization, it is recommended to run the EDA.ipynb. 
 For a more detailed explanation on how to extract information from respective boxplots and data distribution plots, refer to EDA_emotions.ipynb.
 
 
