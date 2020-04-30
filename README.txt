@@ -106,9 +106,15 @@ Therefore, in this project, SGD with momentum is used for further tuning of othe
 
 #### 3.3.3 Loss function 
 In this project, 2 loss functions were implemented.
-	1. binary cross entropy	
-	2. custom propensity loss 
-
+	1. Binary Cross Entropy - Binary Cross Entropy is a simple log loss for each output label	
+	2. Custom Propensity Loss - Our custom loss function consists of a few components, a hamming loss at the core, a binary selector function, a propensity multiplier, and a hinge filter. 
+	
+The hamming loss simply gives the squared difference of the predicted value and the true value of each label. This squared difference is then passed through a binary selector, which only returns 0 for true positive predictions. 
+This is done as the number of labels which are 0 far outweigh the number of labels which are 1 for all of our chosen datasets. For any combination other than true positive, the full squared difference will be propagated.
+After the selector, the loss goes through a propensity multiplier , which applies a different multiplier for each label, based on the number of times that label occurs, or the propensity for that label to occur.
+Finally, a hinge filter is applied as an overall multiplier for all the labels in each data point. The hinge filter will allow the loss to propagate inversely proportionately to the number of correctly classified labels (both true positive and true negatives).
+That is, if all labels are classified correctly, then the resulting loss will be 0, if 50% of the labels are classified correctly, the loss will be multiplied by 0.5.
+		
 
 
 
